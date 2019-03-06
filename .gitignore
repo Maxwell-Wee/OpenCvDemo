@@ -9,6 +9,5 @@
 /build
 /build/*
 .idea/*
-openCVLibrary330/build/*
 /captures
 .externalNativeBuild
