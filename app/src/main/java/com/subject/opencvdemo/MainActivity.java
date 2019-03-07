@@ -3,6 +3,10 @@ package com.subject.opencvdemo;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.hardware.Camera;
+import android.media.MediaActionSound;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
@@ -12,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 
 import com.subject.opencvdemo.models.CameraData;
 import com.subject.opencvdemo.models.MatData;
@@ -20,9 +25,12 @@ import com.subject.opencvdemo.views.CameraPreview;
 import com.subject.opencvdemo.views.DrawView;
 
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Mat;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -33,18 +41,59 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements  Camera.AutoFocusCallback {
 
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_CAMERA = 1;
     private static final int SIZE = 400;
 
+    private ImageView imageView ;
     static {
         if (!OpenCVLoader.initDebug()) {
             Log.v(TAG, "init OpenCV");
         }
     }
+
+
+    Camera.PictureCallback  pictureCallback = new Camera.PictureCallback() {
+        @Override
+        public void onPictureTaken(byte[] data, Camera camera) {
+
+
+
+        }
+    };
+
+
+
+    /**
+     * 把字节数组保存为一个文件
+     * @Author HEH
+     * @EditTime 2010-07-19 上午11:45:56
+     */
+    public static File getFileFromBytes(byte[] b, String outputFile) {
+        BufferedOutputStream stream = null;
+        File file = null;
+        try {
+            file = new File(outputFile);
+            FileOutputStream fstream = new FileOutputStream(file);
+            stream = new BufferedOutputStream(fstream);
+            stream.write(b);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+        return file;
+    }
+
 
     private PublishSubject<CameraData> subject = PublishSubject.create();
 
@@ -52,6 +101,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        imageView = (ImageView) findViewById(R.id.image_croup);
+
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
@@ -88,19 +141,17 @@ public class MainActivity extends AppCompatActivity {
             CameraData cameraData = new CameraData();
             cameraData.data = data;
             cameraData.camera = camera;
+            cameraData.camera.autoFocus(this);
             subject.onNext(cameraData);
         });
+
+
         cameraPreview.setOnClickListener(v -> cameraPreview.focus());
         DrawView drawView = findViewById(R.id.draw_layout);
         subject.concatMap(
                 new Function<CameraData, ObservableSource<? extends MatData>>() {
                     @Override
                     public ObservableSource<? extends MatData> apply(CameraData cameraData) throws Exception {
-
-
-                        Log.e("----->>>","ObservableSource");
-
-
                         return OpenCVHelper.getRgbMat(new MatData(), cameraData.data, cameraData.camera);
                     }
                 })
@@ -124,11 +175,16 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void accept(MatData matData) throws Exception {
                         if (drawView != null) {
+                            Log.e("-->>path", "    ");
                             if (matData.cameraPath != null) {
                                 drawView.setPath(matData.cameraPath);
 
+                                cameraPreview.getmCamera().takePicture(null, null, pictureCallback);
 
-                                Log.e("-->>path", matData.cameraPath.toString());
+
+
+                                new MediaActionSound().play(MediaActionSound.SHUTTER_CLICK);
+
                             } else {
                                 drawView.setPath(null);
                             }
@@ -147,5 +203,16 @@ public class MainActivity extends AppCompatActivity {
 
     private static <T> ObservableTransformer<T, T> mainAsync() {
         return obs -> obs.subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread());
+    }
+
+
+    @Override
+    public void onAutoFocus(boolean success, Camera camera) {
+        if (success){
+            Log.e("--->>>"," onAutoFocus   success");
+        }
+
+
+
     }
 }

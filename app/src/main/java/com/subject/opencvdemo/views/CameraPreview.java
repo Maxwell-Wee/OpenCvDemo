@@ -294,4 +294,12 @@ public class CameraPreview extends SurfaceView
             mCamera.autoFocus((success, camera) -> camera.autoFocus(null));
         }
     }
+
+    public Camera getmCamera() {
+        return mCamera;
+    }
+
+    public void setmCamera(Camera mCamera) {
+        this.mCamera = mCamera;
+    }
 }
