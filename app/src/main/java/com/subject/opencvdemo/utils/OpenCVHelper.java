@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
-import io.*;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -137,7 +136,6 @@ public class OpenCVHelper {
                 Imgproc.drawContours(matData.resizeMat, contours, i, new Scalar(0, 255, 0));
 
                 List<Point> points = approx.toList();
-                Log.e("---->>>", points.size() + "");
                 int pointCount = points.size();
                 LinkedList<Double> cos = new LinkedList<>();
                 for (int j = 2; j < pointCount + 1; j++) {

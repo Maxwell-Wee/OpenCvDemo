@@ -3,7 +3,9 @@ package com.subject.opencvdemo.views;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Camera;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -12,8 +14,16 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
 
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
+
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
+
+import io.reactivex.Observable;
 
 @SuppressWarnings("deprecation")
 public class CameraPreview extends SurfaceView
@@ -30,6 +40,10 @@ public class CameraPreview extends SurfaceView
     protected Camera.Size mPreviewSize;
     protected Camera.Size mPictureSize;
     private Camera.PreviewCallback callback;
+    @Nullable
+    private byte[] p0;
+    @Nullable
+    private Camera p1;
 
     public void setCallback(Camera.PreviewCallback callback) {
         this.callback = callback;
@@ -295,11 +309,5 @@ public class CameraPreview extends SurfaceView
         }
     }
 
-    public Camera getmCamera() {
-        return mCamera;
-    }
 
-    public void setmCamera(Camera mCamera) {
-        this.mCamera = mCamera;
-    }
 }

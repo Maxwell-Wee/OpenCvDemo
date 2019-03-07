@@ -25,6 +25,7 @@ import com.subject.opencvdemo.views.CameraPreview;
 import com.subject.opencvdemo.views.DrawView;
 
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.BufferedOutputStream;
@@ -41,14 +42,15 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
 
-public class MainActivity extends AppCompatActivity implements  Camera.AutoFocusCallback {
+public class MainActivity extends AppCompatActivity implements Camera.AutoFocusCallback {
 
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_CAMERA = 1;
     private static final int SIZE = 400;
 
-    private ImageView imageView ;
+    private ImageView imageView;
+
     static {
         if (!OpenCVLoader.initDebug()) {
             Log.v(TAG, "init OpenCV");
@@ -56,19 +58,18 @@ public class MainActivity extends AppCompatActivity implements  Camera.AutoFocus
     }
 
 
-    Camera.PictureCallback  pictureCallback = new Camera.PictureCallback() {
+    Camera.PictureCallback pictureCallback = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-
 
 
         }
     };
 
 
-
     /**
      * 把字节数组保存为一个文件
+     *
      * @Author HEH
      * @EditTime 2010-07-19 上午11:45:56
      */
@@ -137,12 +138,15 @@ public class MainActivity extends AppCompatActivity implements  Camera.AutoFocus
         layout.addView(cameraPreview, 0,
                 new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT));
-        cameraPreview.setCallback((data, camera) -> {
-            CameraData cameraData = new CameraData();
-            cameraData.data = data;
-            cameraData.camera = camera;
-            cameraData.camera.autoFocus(this);
-            subject.onNext(cameraData);
+        cameraPreview.setCallback(new Camera.PreviewCallback() {
+            @Override
+            public void onPreviewFrame(byte[] data, Camera camera) {
+                CameraData cameraData = new CameraData();
+                cameraData.data = data;
+                cameraData.camera = camera;
+                cameraData.camera.autoFocus(MainActivity.this);
+                subject.onNext(cameraData);
+            }
         });
 
 
@@ -175,15 +179,24 @@ public class MainActivity extends AppCompatActivity implements  Camera.AutoFocus
                     @Override
                     public void accept(MatData matData) throws Exception {
                         if (drawView != null) {
-                            Log.e("-->>path", "    ");
                             if (matData.cameraPath != null) {
                                 drawView.setPath(matData.cameraPath);
 
-                                cameraPreview.getmCamera().takePicture(null, null, pictureCallback);
+                                Log.e("-->>path", "    " + matData.oriMat.width() + "   " + matData.oriMat.height());
 
 
-
-                                new MediaActionSound().play(MediaActionSound.SHUTTER_CLICK);
+//
+//                                val pictureSize = p1?.parameters?.pictureSize
+//                                Log.i(TAG, "picture size: " + pictureSize.toString())
+//                                val mat = Mat(Size(pictureSize?.width?.toDouble() ?: 1920.toDouble(),
+//                                        pictureSize?.height?.toDouble() ?: 1080.toDouble()), CvType.CV_8U)
+//                                mat.put(0, 0, p0)
+//                                val pic = Imgcodecs.imdecode(mat, Imgcodecs.CV_LOAD_IMAGE_UNCHANGED)
+//                                Core.rotate(pic, pic, Core.ROTATE_90_CLOCKWISE)
+//                                mat.release()
+//                                SourceManager.corners = processPicture(pic)
+//                                Imgproc.cvtColor(pic, pic, Imgproc.COLOR_RGB2BGRA)
+//                                SourceManager.pic = pic
 
                             } else {
                                 drawView.setPath(null);
@@ -208,11 +221,9 @@ public class MainActivity extends AppCompatActivity implements  Camera.AutoFocus
 
     @Override
     public void onAutoFocus(boolean success, Camera camera) {
-        if (success){
-            Log.e("--->>>"," onAutoFocus   success");
+        if (success) {
+            Log.e("onAutoFocus", "success");
         }
-
-
-
     }
+
 }
