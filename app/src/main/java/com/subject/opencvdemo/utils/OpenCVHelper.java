@@ -208,6 +208,4 @@ public class OpenCVHelper {
                         Math.pow(y1 - y2, 2));
     }
 
-
-
 }

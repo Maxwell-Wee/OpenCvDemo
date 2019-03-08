@@ -50,49 +50,13 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
     private static final int SIZE = 400;
 
     private ImageView imageView;
+    private ImageView imageView1;
+    private ImageView imageView2;
 
     static {
         if (!OpenCVLoader.initDebug()) {
-            Log.v(TAG, "init OpenCV");
+            Log.e("-->>", "init OpenCV");
         }
-    }
-
-
-    Camera.PictureCallback pictureCallback = new Camera.PictureCallback() {
-        @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
-
-
-        }
-    };
-
-
-    /**
-     * 把字节数组保存为一个文件
-     *
-     * @Author HEH
-     * @EditTime 2010-07-19 上午11:45:56
-     */
-    public static File getFileFromBytes(byte[] b, String outputFile) {
-        BufferedOutputStream stream = null;
-        File file = null;
-        try {
-            file = new File(outputFile);
-            FileOutputStream fstream = new FileOutputStream(file);
-            stream = new BufferedOutputStream(fstream);
-            stream.write(b);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        }
-        return file;
     }
 
 
@@ -104,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
         setContentView(R.layout.activity_main);
 
         imageView = (ImageView) findViewById(R.id.image_croup);
+        imageView1 = (ImageView) findViewById(R.id.image_croup1);
+        imageView2 = (ImageView) findViewById(R.id.image_croup2);
 
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -182,21 +148,21 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
                             if (matData.cameraPath != null) {
                                 drawView.setPath(matData.cameraPath);
 
-                                Log.e("-->>path", "    " + matData.oriMat.width() + "   " + matData.oriMat.height());
+                                Bitmap bitmap = Bitmap.createBitmap(matData.monoChrome.cols(), matData.monoChrome.rows(), Bitmap.Config.ARGB_8888);
+                                Utils.matToBitmap(matData.monoChrome, bitmap);
+                                imageView.setImageBitmap(bitmap);
 
+                                bitmap = Bitmap.createBitmap(matData.oriMat.cols(), matData.oriMat.rows(), Bitmap.Config.ARGB_8888);
+                                Utils.matToBitmap(matData.oriMat, bitmap);
+                                imageView1.setImageBitmap(bitmap);
 
-//
-//                                val pictureSize = p1?.parameters?.pictureSize
-//                                Log.i(TAG, "picture size: " + pictureSize.toString())
-//                                val mat = Mat(Size(pictureSize?.width?.toDouble() ?: 1920.toDouble(),
-//                                        pictureSize?.height?.toDouble() ?: 1080.toDouble()), CvType.CV_8U)
-//                                mat.put(0, 0, p0)
-//                                val pic = Imgcodecs.imdecode(mat, Imgcodecs.CV_LOAD_IMAGE_UNCHANGED)
-//                                Core.rotate(pic, pic, Core.ROTATE_90_CLOCKWISE)
-//                                mat.release()
-//                                SourceManager.corners = processPicture(pic)
-//                                Imgproc.cvtColor(pic, pic, Imgproc.COLOR_RGB2BGRA)
-//                                SourceManager.pic = pic
+                                bitmap = Bitmap.createBitmap(matData.resizeMat.cols(), matData.resizeMat.rows(), Bitmap.Config.ARGB_8888);
+                                Utils.matToBitmap(matData.resizeMat, bitmap);
+                                imageView2.setImageBitmap(bitmap);
+
+                                matData.resizeMat.release();
+                                matData.oriMat.release();
+                                matData.monoChrome.release();
 
                             } else {
                                 drawView.setPath(null);

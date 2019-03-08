@@ -30,7 +30,7 @@ public class DrawView extends View {
     private void init() {
         paint = new Paint();
         paint.setColor(Color.BLUE);
-        paint.setStrokeWidth(10);
+        paint.setStrokeWidth(1);
         paint.setStyle(Paint.Style.STROKE);
     }
 
