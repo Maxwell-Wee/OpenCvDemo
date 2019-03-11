@@ -4,11 +4,8 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Camera;
-import android.media.MediaActionSound;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -26,12 +23,13 @@ import com.subject.opencvdemo.views.DrawView;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -51,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
 
     private ImageView imageView;
     private ImageView imageView1;
-    private ImageView imageView2;
 
     static {
         if (!OpenCVLoader.initDebug()) {
@@ -69,7 +66,6 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
 
         imageView = (ImageView) findViewById(R.id.image_croup);
         imageView1 = (ImageView) findViewById(R.id.image_croup1);
-        imageView2 = (ImageView) findViewById(R.id.image_croup2);
 
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -110,7 +106,6 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
                 CameraData cameraData = new CameraData();
                 cameraData.data = data;
                 cameraData.camera = camera;
-                cameraData.camera.autoFocus(MainActivity.this);
                 subject.onNext(cameraData);
             }
         });
@@ -151,14 +146,15 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
                                 Bitmap bitmap = Bitmap.createBitmap(matData.monoChrome.cols(), matData.monoChrome.rows(), Bitmap.Config.ARGB_8888);
                                 Utils.matToBitmap(matData.monoChrome, bitmap);
                                 imageView.setImageBitmap(bitmap);
+                                Log.e("--->>>", "--------");
+                                Log.e("--->>>", matData.points.get(0).x + ":" + matData.points.get(0).y);
+                                Log.e("--->>>", matData.points.get(1).x + ":" + matData.points.get(1).y);
+                                Log.e("--->>>", matData.points.get(2).x + ":" + matData.points.get(2).y);
+                                Log.e("--->>>", matData.points.get(3).x + ":" + matData.points.get(3).y);
 
-                                bitmap = Bitmap.createBitmap(matData.oriMat.cols(), matData.oriMat.rows(), Bitmap.Config.ARGB_8888);
-                                Utils.matToBitmap(matData.oriMat, bitmap);
-                                imageView1.setImageBitmap(bitmap);
 
-                                bitmap = Bitmap.createBitmap(matData.resizeMat.cols(), matData.resizeMat.rows(), Bitmap.Config.ARGB_8888);
-                                Utils.matToBitmap(matData.resizeMat, bitmap);
-                                imageView2.setImageBitmap(bitmap);
+                               cropPicture(matData.resizeMat, matData.points);
+
 
                                 matData.resizeMat.release();
                                 matData.oriMat.release();
@@ -191,5 +187,67 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
             Log.e("onAutoFocus", "success");
         }
     }
+
+
+    private void cropPicture(Mat picture, List<Point> pts) {
+        Point tl = pts.get(0);
+        Point tr = pts.get(1);
+        Point br = pts.get(2);
+        Point bl = pts.get(3);
+
+        double widthA = Math.sqrt(Math.pow(br.x - bl.x, 2.0) + Math.pow(br.y - bl.y, 2.0));
+        double widthB = Math.sqrt(Math.pow(tr.x - tl.x, 2.0) + Math.pow(tr.y - tl.y, 2.0));
+
+        double dw = Math.max(widthA, widthB);
+        int maxWidth = (int) dw;
+
+        double heightA = Math.sqrt(Math.pow(tr.x - br.x, 2.0) + Math.pow(tr.y - br.y, 2.0));
+        double heightB = Math.sqrt(Math.pow(tl.x - bl.x, 2.0) + Math.pow(tl.y - bl.y, 2.0));
+
+        double dh = Math.max(heightA, heightB);
+        int maxHeight = (int) dh;
+
+        Mat croppedPic = new Mat(maxHeight, maxWidth, CvType.CV_8UC4);
+
+        Mat src_mat = new  Mat(4, 1, CvType.CV_32FC2);
+        Mat dst_mat = new  Mat(4, 1, CvType.CV_32FC2);
+
+        src_mat.put(0, 0, tl.x, tl.y, tr.x, tr.y, br.x, br.y, bl.x, bl.y);
+        dst_mat.put(0, 0, 0.0, 0.0, dw, 0.0, dw, dh, 0.0, dh);
+
+        Mat m = Imgproc.getPerspectiveTransform(src_mat, dst_mat);
+
+
+        Imgproc.warpPerspective(picture, croppedPic, m, croppedPic.size());
+
+
+        Bitmap bitmap = Bitmap.createBitmap(croppedPic.cols(), croppedPic.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(croppedPic, bitmap);
+
+        m.release();
+        src_mat.release();
+        dst_mat.release();
+    }
+
+
+    private void dddd(Mat image, List<Point> pts) {
+
+        Point tl = pts.get(0);
+        Point bl = pts.get(3);
+
+
+
+
+        Rect rect = new Rect((int) tl.x, (int) tl.y, (int) bl.x, (int) bl.y);
+        Mat roi_img = new Mat(image, rect);
+
+
+        Bitmap bitmap = Bitmap.createBitmap(roi_img.cols(), roi_img.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(roi_img, bitmap);
+        imageView1.setImageBitmap(bitmap);
+
+
+    }
+
 
 }
