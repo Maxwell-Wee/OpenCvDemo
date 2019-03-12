@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
                                 Log.e("--->>>", matData.points.get(3).x + ":" + matData.points.get(3).y);
 
 
-                               cropPicture(matData.resizeMat, matData.points);
+                                cropPicture(matData.resizeMat, matData.points);
 
 
                                 matData.resizeMat.release();
@@ -209,8 +209,8 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
 
         Mat croppedPic = new Mat(maxHeight, maxWidth, CvType.CV_8UC4);
 
-        Mat src_mat = new  Mat(4, 1, CvType.CV_32FC2);
-        Mat dst_mat = new  Mat(4, 1, CvType.CV_32FC2);
+        Mat src_mat = new Mat(4, 1, CvType.CV_32FC2);
+        Mat dst_mat = new Mat(4, 1, CvType.CV_32FC2);
 
         src_mat.put(0, 0, tl.x, tl.y, tr.x, tr.y, br.x, br.y, bl.x, bl.y);
         dst_mat.put(0, 0, 0.0, 0.0, dw, 0.0, dw, dh, 0.0, dh);
@@ -223,31 +223,10 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
 
         Bitmap bitmap = Bitmap.createBitmap(croppedPic.cols(), croppedPic.rows(), Bitmap.Config.ARGB_8888);
         Utils.matToBitmap(croppedPic, bitmap);
+        imageView1.setImageBitmap(bitmap);
 
         m.release();
         src_mat.release();
         dst_mat.release();
     }
-
-
-    private void dddd(Mat image, List<Point> pts) {
-
-        Point tl = pts.get(0);
-        Point bl = pts.get(3);
-
-
-
-
-        Rect rect = new Rect((int) tl.x, (int) tl.y, (int) bl.x, (int) bl.y);
-        Mat roi_img = new Mat(image, rect);
-
-
-        Bitmap bitmap = Bitmap.createBitmap(roi_img.cols(), roi_img.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(roi_img, bitmap);
-        imageView1.setImageBitmap(bitmap);
-
-
-    }
-
-
 }
