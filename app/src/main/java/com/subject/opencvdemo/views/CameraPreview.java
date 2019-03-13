@@ -16,6 +16,7 @@ import android.widget.FrameLayout;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
@@ -83,6 +84,17 @@ public class CameraPreview extends SurfaceView
         Camera.Parameters cameraParams = mCamera.getParameters();
         mPreviewSizeList = cameraParams.getSupportedPreviewSizes();
         mPictureSizeList = cameraParams.getSupportedPictureSizes();
+
+
+//        for (int i = 0; i < mPreviewSizeList.size(); i++) {
+//            Camera.Size size = mPreviewSizeList.get(i);
+//            Log.e("---->>>", "size.height :" + size.height + "      size.width :" + size.width);
+//        }
+
+//        for (int i = 0; i < mPictureSizeList.size(); i++) {
+//            Camera.Size size = mPictureSizeList.get(i);
+//            Log.e("---->>>", "size.height :" + size.height + "      size.width :" + size.width);
+//        }
     }
 
     @Override
@@ -116,7 +128,9 @@ public class CameraPreview extends SurfaceView
         // called again due to the change of the layout size in this if-statement.
         if (!mSurfaceConfiguring) {
             Camera.Size previewSize = determinePreviewSize(width, height);
-            Camera.Size pictureSize = determinePictureSize(previewSize);
+//            Camera.Size pictureSize = determinePictureSize(previewSize);
+            Camera.Size pictureSize = previewSize;
+
             Log.v(TAG, "Desired Preview Size - w: " + width + ", h: " + height);
             mPreviewSize = previewSize;
             mPictureSize = pictureSize;
@@ -187,31 +201,31 @@ public class CameraPreview extends SurfaceView
         return retSize;
     }
 
-    protected Camera.Size determinePictureSize(Camera.Size previewSize) {
-        Camera.Size retSize = null;
-        for (Camera.Size size : mPictureSizeList) {
-            if (size.equals(previewSize)) {
-                return size;
-            }
-        }
-
-        Log.v(TAG, "Same picture size not found.");
-
-        // if the preview size is not supported as a picture size
-        float reqRatio = ((float) previewSize.width) / previewSize.height;
-        float curRatio, deltaRatio;
-        float deltaRatioMin = Float.MAX_VALUE;
-        for (Camera.Size size : mPictureSizeList) {
-            curRatio = ((float) size.width) / size.height;
-            deltaRatio = Math.abs(reqRatio - curRatio);
-            if (deltaRatio < deltaRatioMin) {
-                deltaRatioMin = deltaRatio;
-                retSize = size;
-            }
-        }
-
-        return retSize;
-    }
+//    protected Camera.Size determinePictureSize(Camera.Size previewSize) {
+//        Camera.Size retSize = null;
+//        for (Camera.Size size : mPictureSizeList) {
+//            if (size.equals(previewSize)) {
+//                return size;
+//            }
+//        }
+//
+//        Log.v(TAG, "Same picture size not found.");
+//
+//        // if the preview size is not supported as a picture size
+//        float reqRatio = ((float) previewSize.width) / previewSize.height;
+//        float curRatio, deltaRatio;
+//        float deltaRatioMin = Float.MAX_VALUE;
+//        for (Camera.Size size : mPictureSizeList) {
+//            curRatio = ((float) size.width) / size.height;
+//            deltaRatio = Math.abs(reqRatio - curRatio);
+//            if (deltaRatio < deltaRatioMin) {
+//                deltaRatioMin = deltaRatio;
+//                retSize = size;
+//            }
+//        }
+//
+//        return retSize;
+//    }
 
     protected boolean adjustSurfaceLayoutSize(Camera.Size previewSize,
                                               int availableWidth, int availableHeight) {

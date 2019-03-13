@@ -8,7 +8,7 @@ import org.opencv.core.Point;
 import java.util.List;
 
 public class MatData {
-    public Mat resizeMat;
+//    public Mat resizeMat;
     public Mat monoChrome;
     public List<Point> points;
     public Mat oriMat;

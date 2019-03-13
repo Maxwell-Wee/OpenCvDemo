@@ -32,25 +32,6 @@ public class OpenCVHelper {
 
     private static final String TAG = OpenCVHelper.class.getSimpleName();
 
-    public static Observable<MatData> resize(MatData matData, float requestWidth, float requestHeight) {
-        return Observable.create(sub -> {
-            Mat mat = matData.oriMat;
-            final int height = mat.height();
-            final int width = mat.width();
-            float ratioW = width / requestWidth;
-            float ratioH = height / requestHeight;
-            float scaleRatio = ratioW > ratioH ? ratioW : ratioH;
-            Size size = new Size(mat.width() / scaleRatio, mat.height() / scaleRatio);
-            Mat resultMat = new Mat(size, mat.type());
-            Imgproc.resize(mat, resultMat, size);
-            Log.v(TAG, "request size:" + requestWidth + "," + requestHeight +
-                    " ,scale to:" + resultMat.width() + "," + resultMat.height());
-            matData.resizeMat = resultMat;
-            sub.onNext(matData);
-            sub.onComplete();
-        });
-    }
-
     public static Observable<MatData> getRgbMat(MatData matData, byte[] data, Camera camera) {
         return Observable.create(sub -> {
             try {
@@ -79,16 +60,11 @@ public class OpenCVHelper {
             @Override
             public void subscribe(ObservableEmitter<MatData> sub) throws Exception {
                 long now = System.currentTimeMillis();
-                Mat edgeMat = getEdge(matData.resizeMat);
+                Mat edgeMat = getEdge(matData.oriMat);
                 matData.monoChrome = new Mat();
-//                Log.e("--->>edgeMat:", edgeMat.nativeObj + "   "  +  matData.monoChrome.nativeObj);
-//                Imgproc.equalizeHist(edgeMat, matData.monoChrome);
-
-
-
-
                 Imgproc.threshold(edgeMat, matData.monoChrome, 127, 255, Imgproc.THRESH_BINARY);
                 Log.v(TAG, "getMonochromeMat time:" + (System.currentTimeMillis() - now));
+
                 sub.onNext(matData);
                 sub.onComplete();
             }
@@ -133,7 +109,7 @@ public class OpenCVHelper {
                         !Imgproc.isContourConvex(new MatOfPoint(approx.toArray()))) {
                     continue;
                 }
-                Imgproc.drawContours(matData.resizeMat, contours, i, new Scalar(0, 255, 0));
+                Imgproc.drawContours(matData.oriMat, contours, i, new Scalar(0, 255, 0));
 
                 List<Point> points = approx.toList();
                 int pointCount = points.size();
@@ -168,33 +144,40 @@ public class OpenCVHelper {
     }
 
     public static Observable<MatData> getPath(MatData matData) {
-        return Observable.create(subscriber -> {
-            List<Point> cameraPoints = new ArrayList<>();
-            if (matData.points != null && matData.points.size() == 4) {
-                for (int i = 0; i < matData.points.size(); i++) {
-                    Point point = matData.points.get(i);
-                    Point cameraPoint = new Point(
-                            point.x * matData.resizeRatio * matData.cameraRatio,
-                            point.y * matData.resizeRatio * matData.cameraRatio);
-                    cameraPoints.add(cameraPoint);
+        return Observable.create(new ObservableOnSubscribe<MatData>() {
+            @Override
+            public void subscribe(ObservableEmitter<MatData> subscriber) throws Exception {
+                List<Point> cameraPoints = new ArrayList<>();
+                if (matData.points != null && matData.points.size() == 4) {
+                    for (int i = 0; i < matData.points.size(); i++) {
+                        Point point = matData.points.get(i);
+                        Point cameraPoint = new Point(
+                                point.x * matData.resizeRatio * matData.cameraRatio,
+                                point.y * matData.resizeRatio * matData.cameraRatio);
+                        cameraPoints.add(cameraPoint);
+                    }
+                    Collections.sort(cameraPoints, new Comparator<Point>() {
+                        @Override
+                        public int compare(Point lhs, Point rhs) {
+                            return OpenCVHelper.getDistance(lhs) - OpenCVHelper.getDistance(rhs);
+                        }
+                    });
+                    Path path = new Path();
+                    path.moveTo((float) cameraPoints.get(0).x,
+                            (float) cameraPoints.get(0).y);
+                    path.lineTo((float) cameraPoints.get(1).x,
+                            (float) cameraPoints.get(1).y);
+                    path.lineTo((float) cameraPoints.get(3).x,
+                            (float) cameraPoints.get(3).y);
+                    path.lineTo((float) cameraPoints.get(2).x,
+                            (float) cameraPoints.get(2).y);
+                    path.lineTo((float) cameraPoints.get(0).x,
+                            (float) cameraPoints.get(0).y);
+                    matData.cameraPath = path;
                 }
-                Collections.sort(cameraPoints, (lhs, rhs) ->
-                        OpenCVHelper.getDistance(lhs) - OpenCVHelper.getDistance(rhs));
-                Path path = new Path();
-                path.moveTo((float) cameraPoints.get(0).x,
-                        (float) cameraPoints.get(0).y);
-                path.lineTo((float) cameraPoints.get(1).x,
-                        (float) cameraPoints.get(1).y);
-                path.lineTo((float) cameraPoints.get(3).x,
-                        (float) cameraPoints.get(3).y);
-                path.lineTo((float) cameraPoints.get(2).x,
-                        (float) cameraPoints.get(2).y);
-                path.lineTo((float) cameraPoints.get(0).x,
-                        (float) cameraPoints.get(0).y);
-                matData.cameraPath = path;
+                subscriber.onNext(matData);
+                subscriber.onComplete();
             }
-            subscriber.onNext(matData);
-            subscriber.onComplete();
         });
     }
 

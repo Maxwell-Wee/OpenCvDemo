@@ -2,6 +2,7 @@ package com.subject.opencvdemo;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
@@ -11,10 +12,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.subject.opencvdemo.application.OpenCvApplication;
 import com.subject.opencvdemo.models.CameraData;
 import com.subject.opencvdemo.models.MatData;
 import com.subject.opencvdemo.utils.OpenCVHelper;
@@ -52,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
 
     static {
         if (!OpenCVLoader.initDebug()) {
-            Log.e("-->>", "init OpenCV");
         }
     }
 
@@ -66,8 +69,6 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
 
         imageView = (ImageView) findViewById(R.id.image_croup);
         imageView1 = (ImageView) findViewById(R.id.image_croup1);
-
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
@@ -106,12 +107,12 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
                 CameraData cameraData = new CameraData();
                 cameraData.data = data;
                 cameraData.camera = camera;
+
                 subject.onNext(cameraData);
             }
         });
-
-
         cameraPreview.setOnClickListener(v -> cameraPreview.focus());
+
         DrawView drawView = findViewById(R.id.draw_layout);
         subject.concatMap(
                 new Function<CameraData, ObservableSource<? extends MatData>>() {
@@ -120,16 +121,9 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
                         return OpenCVHelper.getRgbMat(new MatData(), cameraData.data, cameraData.camera);
                     }
                 })
-                .concatMap(new Function<MatData, ObservableSource<? extends MatData>>() {
-                    @Override
-                    public ObservableSource<? extends MatData> apply(MatData matData) throws Exception {
-                        return OpenCVHelper.resize(matData, SIZE, SIZE);
-                    }
-                })
                 .map(new Function<MatData, MatData>() {
                     @Override
                     public MatData apply(MatData matData) throws Exception {
-                        matData.resizeRatio = (float) matData.oriMat.height() / matData.resizeMat.height();
                         matData.cameraRatio = (float) cameraPreview.getHeight() / matData.oriMat.height();
                         return matData;
                     }
@@ -142,21 +136,7 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
                         if (drawView != null) {
                             if (matData.cameraPath != null) {
                                 drawView.setPath(matData.cameraPath);
-
-                                Bitmap bitmap = Bitmap.createBitmap(matData.monoChrome.cols(), matData.monoChrome.rows(), Bitmap.Config.ARGB_8888);
-                                Utils.matToBitmap(matData.monoChrome, bitmap);
-                                imageView.setImageBitmap(bitmap);
-                                Log.e("--->>>", "--------");
-                                Log.e("--->>>", matData.points.get(0).x + ":" + matData.points.get(0).y);
-                                Log.e("--->>>", matData.points.get(1).x + ":" + matData.points.get(1).y);
-                                Log.e("--->>>", matData.points.get(2).x + ":" + matData.points.get(2).y);
-                                Log.e("--->>>", matData.points.get(3).x + ":" + matData.points.get(3).y);
-
-
-                                cropPicture(matData.resizeMat, matData.points);
-
-
-                                matData.resizeMat.release();
+                                cropPicture(matData.oriMat, matData.points);
                                 matData.oriMat.release();
                                 matData.monoChrome.release();
 
@@ -195,17 +175,17 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
         Point br = pts.get(2);
         Point bl = pts.get(3);
 
-        double widthA = Math.sqrt(Math.pow(br.x - bl.x, 2.0) + Math.pow(br.y - bl.y, 2.0));
-        double widthB = Math.sqrt(Math.pow(tr.x - tl.x, 2.0) + Math.pow(tr.y - tl.y, 2.0));
+        double widthA = Math.sqrt(Math.pow((br.x - bl.x), 2.0) + Math.pow((br.y - bl.y), 2.0));
+        double widthB = Math.sqrt(Math.pow((tr.x - tl.x), 2.0) + Math.pow((tr.y - tl.y), 2.0));
 
         double dw = Math.max(widthA, widthB);
-        int maxWidth = (int) dw;
+        int maxWidth = (int) (dw);
 
-        double heightA = Math.sqrt(Math.pow(tr.x - br.x, 2.0) + Math.pow(tr.y - br.y, 2.0));
-        double heightB = Math.sqrt(Math.pow(tl.x - bl.x, 2.0) + Math.pow(tl.y - bl.y, 2.0));
+        double heightA = Math.sqrt(Math.pow((tr.x - br.x), 2.0) + Math.pow((tr.y - br.y), 2.0));
+        double heightB = Math.sqrt(Math.pow((tl.x - bl.x), 2.0) + Math.pow((tl.y - bl.y), 2.0));
 
         double dh = Math.max(heightA, heightB);
-        int maxHeight = (int) dh;
+        int maxHeight = (int) (dh);
 
         Mat croppedPic = new Mat(maxHeight, maxWidth, CvType.CV_8UC4);
 
@@ -216,7 +196,6 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
         dst_mat.put(0, 0, 0.0, 0.0, dw, 0.0, dw, dh, 0.0, dh);
 
         Mat m = Imgproc.getPerspectiveTransform(src_mat, dst_mat);
-
 
         Imgproc.warpPerspective(picture, croppedPic, m, croppedPic.size());
 
