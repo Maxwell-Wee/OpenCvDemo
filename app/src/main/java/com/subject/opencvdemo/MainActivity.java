@@ -2,7 +2,6 @@ package com.subject.opencvdemo;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
@@ -12,13 +11,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.subject.opencvdemo.application.OpenCvApplication;
 import com.subject.opencvdemo.models.CameraData;
 import com.subject.opencvdemo.models.MatData;
 import com.subject.opencvdemo.utils.OpenCVHelper;
@@ -30,7 +26,6 @@ import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
