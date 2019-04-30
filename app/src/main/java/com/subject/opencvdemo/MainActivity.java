@@ -62,8 +62,8 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imageView = (ImageView) findViewById(R.id.image_croup);
-        imageView1 = (ImageView) findViewById(R.id.image_croup1);
+        imageView = findViewById(R.id.image_croup);
+        imageView1 = findViewById(R.id.image_croup1);
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
@@ -110,36 +110,25 @@ public class MainActivity extends AppCompatActivity implements Camera.AutoFocusC
 
         DrawView drawView = findViewById(R.id.draw_layout);
         subject.concatMap(
-                new Function<CameraData, ObservableSource<? extends MatData>>() {
-                    @Override
-                    public ObservableSource<? extends MatData> apply(CameraData cameraData) throws Exception {
-                        return OpenCVHelper.getRgbMat(new MatData(), cameraData.data, cameraData.camera);
-                    }
-                })
-                .map(new Function<MatData, MatData>() {
-                    @Override
-                    public MatData apply(MatData matData) throws Exception {
-                        matData.cameraRatio = (float) cameraPreview.getHeight() / matData.oriMat.height();
-                        return matData;
-                    }
+                cameraData -> OpenCVHelper.getRgbMat(new MatData(), cameraData.data, cameraData.camera))
+                .map(matData -> {
+                    matData.cameraRatio = (float) cameraPreview.getHeight() / matData.oriMat.height();
+                    return matData;
                 })
                 .concatMap(this::detectRect)
                 .compose(mainAsync())
-                .subscribe(new Consumer<MatData>() {
-                    @Override
-                    public void accept(MatData matData) throws Exception {
-                        if (drawView != null) {
-                            if (matData.cameraPath != null) {
-                                drawView.setPath(matData.cameraPath);
-                                cropPicture(matData.oriMat, matData.points);
-                                matData.oriMat.release();
-                                matData.monoChrome.release();
+                .subscribe(matData -> {
+                    if (drawView != null) {
+                        if (matData.cameraPath != null) {
+                            drawView.setPath(matData.cameraPath);
+                            cropPicture(matData.oriMat, matData.points);
+                            matData.oriMat.release();
+                            matData.monoChrome.release();
 
-                            } else {
-                                drawView.setPath(null);
-                            }
-                            drawView.invalidate();
+                        } else {
+                            drawView.setPath(null);
                         }
+                        drawView.invalidate();
                     }
                 });
     }

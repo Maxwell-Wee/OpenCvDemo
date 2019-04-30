@@ -27,12 +27,10 @@ import java.util.function.Consumer;
 import io.reactivex.Observable;
 
 @SuppressWarnings("deprecation")
-public class CameraPreview extends SurfaceView
-        implements SurfaceHolder.Callback {
+public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String TAG = CameraPreview.class.getSimpleName();
     private SurfaceHolder mHolder;
     private Camera mCamera;
-
     private LayoutMode mLayoutMode;
     protected List<Camera.Size> mPreviewSizeList;
     protected List<Camera.Size> mPictureSizeList;
@@ -41,10 +39,6 @@ public class CameraPreview extends SurfaceView
     protected Camera.Size mPreviewSize;
     protected Camera.Size mPictureSize;
     private Camera.PreviewCallback callback;
-    @Nullable
-    private byte[] p0;
-    @Nullable
-    private Camera p1;
 
     public void setCallback(Camera.PreviewCallback callback) {
         this.callback = callback;
@@ -84,17 +78,6 @@ public class CameraPreview extends SurfaceView
         Camera.Parameters cameraParams = mCamera.getParameters();
         mPreviewSizeList = cameraParams.getSupportedPreviewSizes();
         mPictureSizeList = cameraParams.getSupportedPictureSizes();
-
-
-//        for (int i = 0; i < mPreviewSizeList.size(); i++) {
-//            Camera.Size size = mPreviewSizeList.get(i);
-//            Log.e("---->>>", "size.height :" + size.height + "      size.width :" + size.width);
-//        }
-
-//        for (int i = 0; i < mPictureSizeList.size(); i++) {
-//            Camera.Size size = mPictureSizeList.get(i);
-//            Log.e("---->>>", "size.height :" + size.height + "      size.width :" + size.width);
-//        }
     }
 
     @Override
@@ -128,7 +111,6 @@ public class CameraPreview extends SurfaceView
         // called again due to the change of the layout size in this if-statement.
         if (!mSurfaceConfiguring) {
             Camera.Size previewSize = determinePreviewSize(width, height);
-//            Camera.Size pictureSize = determinePictureSize(previewSize);
             Camera.Size pictureSize = previewSize;
 
             Log.v(TAG, "Desired Preview Size - w: " + width + ", h: " + height);
@@ -174,16 +156,6 @@ public class CameraPreview extends SurfaceView
         // Meaning of width and height is switched for preview when portrait,
         // while it is the same as user's view for surface and metrics.
         // That is, width must always be larger than height for setPreviewSize.
-
-        Log.v(TAG, "Listing all supported preview sizes");
-        for (Camera.Size size : mPreviewSizeList) {
-            Log.v(TAG, "  w: " + size.width + ", h: " + size.height);
-        }
-        Log.v(TAG, "Listing all supported picture sizes");
-        for (Camera.Size size : mPictureSizeList) {
-            Log.v(TAG, "  w: " + size.width + ", h: " + size.height);
-        }
-
         // Adjust surface size with the closest aspect-ratio
         float reqRatio = ((float) reqHeight) / reqWidth;
         float curRatio, deltaRatio;
@@ -193,42 +165,14 @@ public class CameraPreview extends SurfaceView
             curRatio = ((float) size.width) / size.height;
             deltaRatio = Math.abs(reqRatio - curRatio);
             if (deltaRatio < deltaRatioMin) {
-                deltaRatioMin = deltaRatio;
-                retSize = size;
+                return size;
             }
         }
 
         return retSize;
     }
 
-//    protected Camera.Size determinePictureSize(Camera.Size previewSize) {
-//        Camera.Size retSize = null;
-//        for (Camera.Size size : mPictureSizeList) {
-//            if (size.equals(previewSize)) {
-//                return size;
-//            }
-//        }
-//
-//        Log.v(TAG, "Same picture size not found.");
-//
-//        // if the preview size is not supported as a picture size
-//        float reqRatio = ((float) previewSize.width) / previewSize.height;
-//        float curRatio, deltaRatio;
-//        float deltaRatioMin = Float.MAX_VALUE;
-//        for (Camera.Size size : mPictureSizeList) {
-//            curRatio = ((float) size.width) / size.height;
-//            deltaRatio = Math.abs(reqRatio - curRatio);
-//            if (deltaRatio < deltaRatioMin) {
-//                deltaRatioMin = deltaRatio;
-//                retSize = size;
-//            }
-//        }
-//
-//        return retSize;
-//    }
-
-    protected boolean adjustSurfaceLayoutSize(Camera.Size previewSize,
-                                              int availableWidth, int availableHeight) {
+    protected boolean adjustSurfaceLayoutSize(Camera.Size previewSize, int availableWidth, int availableHeight) {
         float tmpLayoutH = previewSize.width;
         float tmpLayoutW = previewSize.height;
 
@@ -322,6 +266,4 @@ public class CameraPreview extends SurfaceView
             mCamera.autoFocus((success, camera) -> camera.autoFocus(null));
         }
     }
-
-
 }
