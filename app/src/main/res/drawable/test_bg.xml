@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- android:shape 可取值有：
+                   rectangle 矩形
+                   oval     圆
+                   line     线
+                   ring     环 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- 大小 宽高 -->
+    <size
+        android:width="100dp"
+        android:height="100dp" />
+
+
+    <!-- 颜色渐变
+         android:startColor:起始颜色
+         android:endColor:终止颜色
+         android:cneterColor:中间过渡颜色
+         android:angle:旋转角度，逆时针，45的倍数，0度是从左往右，90度是从下往上
+         android:type:渐变类型：
+                      linear  线性渐变
+                      radial 放射性渐变，需设置android:gradientRadius渐变半径
+                      sweep  扫描渐变 顺时针扫描 -->
+    <gradient
+        android:angle="45"
+        android:endColor="#ffffff"
+        android:gradientRadius="50dp"
+        android:startColor="#000000"
+        android:type="linear" />
+
+    <!-- 填充 会覆盖渐变色 -->
+    <solid android:color="#ffffff" />
+
+    <!-- 圆角 不同位置圆角角度：
+                        android:radius              四个角　　　
+                        android:topLeftRadius       左上　　
+                        android:topRightRadius      右上
+                        android:bottomLeftRadius    左下
+                        android:bottomRightRadius   右下 -->
+    <corners android:radius="5dp" />
+
+    <!-- 描边，边框的属性：
+            android:width:边框宽度
+            android:color:边框颜色
+            android:dashWidth:边框类型，0：实线，大于0：虚线
+                    android:dashGap:虚线间隔 -->
+    <stroke
+        android:width="2dp"
+        android:color="#22ccdd"
+        android:dashGap="1dp"
+        android:dashWidth="1dp" />
+</shape>

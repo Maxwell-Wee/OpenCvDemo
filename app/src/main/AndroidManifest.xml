@@ -4,6 +4,14 @@
     package="com.subject.opencvdemo">
 
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"/>
+
+    <uses-permission android:name="android.permission.ACTION_MANAGE_OVERLAY_PERMISSION" />
+
+
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
@@ -15,6 +23,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".Test2Activity"/>
+        <activity android:name=".ImageManipulationsActivity"/>
+        <activity android:name=".Tutorial3Activity"/>
+        <activity android:name=".OpenVcActivity"/>
+        <activity android:name=".TestActivity"/>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,18 +37,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ImageManipulationsActivity">
-        </activity>
-
-
-
-        <activity android:name=".Tutorial3Activity">
-        </activity>
-
-
-        <activity android:name=".OpenVcActivity">
-
-        </activity>
 
 
     </application>

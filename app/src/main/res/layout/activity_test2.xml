@@ -12,12 +12,6 @@
         android:layout_height="wrap_content"
         android:gravity="center" />
 
-    <RelativeLayout
-        android:layout_gravity="center"
-        android:background="@color/colorAccent"
-        android:id="@+id/view"
-        android:layout_width="300dp"
-        android:layout_height="200dp"/>
 
 
 </LinearLayout>
