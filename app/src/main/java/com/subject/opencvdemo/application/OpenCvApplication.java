@@ -57,8 +57,7 @@ public class OpenCvApplication extends Application {
         wm.addView(CustomeMovebutton, wmParams);
         CustomeMovebutton.setOnSpeakListener(() -> {
             Toast.makeText(this, "点击事件", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this,TestActivity.class);
-            startActivity(intent);
+
         });
     }
 
