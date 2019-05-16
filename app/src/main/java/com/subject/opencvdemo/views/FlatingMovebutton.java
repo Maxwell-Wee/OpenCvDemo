@@ -5,17 +5,18 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
-import com.subject.opencvdemo.R;
 import com.subject.opencvdemo.application.OpenCvApplication;
 
-public class CustomeMovebutton extends android.support.v7.widget.AppCompatImageView {
+import java.util.Set;
+
+public class FlatingMovebutton extends android.support.v7.widget.AppCompatImageView {
     private final int statusHeight;
     int sW;
     int sH;
     private float mTouchStartX;
     private float mTouchStartY;
-    private float x;
-    private float y;
+    private float mRawX;
+    private float mRawY;
     private boolean isMove=false;
     private Context context;
     private WindowManager wm = (WindowManager) getContext().getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
@@ -28,15 +29,16 @@ public class CustomeMovebutton extends android.support.v7.widget.AppCompatImageV
     private long mUpTime;
     private OnSpeakListener listener;
 
-    public CustomeMovebutton(Context context) {
+    public FlatingMovebutton(Context context) {
         this(context,null);
         this.context = context;
     }
-    public CustomeMovebutton(Context context, AttributeSet attrs) {
-        this(context, attrs,-1);
+    public FlatingMovebutton(Context context, AttributeSet attrs) {
+        this(context, attrs, -1);
     }
-    public CustomeMovebutton(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs,defStyleAttr);
+
+    public FlatingMovebutton(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         sW = wm.getDefaultDisplay().getWidth();
         sH = wm.getDefaultDisplay().getHeight();
         statusHeight = getStatusHeight(context);
@@ -62,8 +64,8 @@ public class CustomeMovebutton extends android.support.v7.widget.AppCompatImageV
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         //获取相对屏幕的坐标，即以屏幕左上角为原点
-        x = event.getRawX();
-        y = event.getRawY() - statusHeight;   //statusHeight是系统状态栏的高度
+        mRawX = event.getRawX();
+        mRawY = event.getRawY() - statusHeight;   //statusHeight是系统状态栏的高度
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:    //按下
                 mTouchStartX = event.getX();
@@ -96,14 +98,11 @@ public class CustomeMovebutton extends android.support.v7.widget.AppCompatImageV
     }
 
     private void updateViewPosition() {
-        wmParams.x = (int) (x - mTouchStartX);
-        wmParams.y = (int) (y- mTouchStartY);
+        wmParams.x = (int) (mRawX - mTouchStartX);
+        wmParams.y = (int) (mRawY - mTouchStartY);
         wm.updateViewLayout(this, wmParams);  //刷新显示
     }
 
-    /**
-     * 设置点击回调接口
-     */
     public interface OnSpeakListener{
         void onSpeakListener();
     }
