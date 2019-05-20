@@ -32,6 +32,12 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true" />
 
+
+        <!--<com.subject.opencvdemo.views.DragFloatActionButton-->
+            <!--android:layout_width="200dp"-->
+            <!--android:id="@+id/dragFloatActionButton"-->
+            <!--android:layout_height="100dp" />-->
+
     </RelativeLayout>
 
 
