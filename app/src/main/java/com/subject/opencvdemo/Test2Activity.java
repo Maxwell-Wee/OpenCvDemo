@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.TextView;
 
 import com.subject.opencvdemo.views.DragFloatActionButton;
 
@@ -18,13 +19,34 @@ public class Test2Activity extends AppCompatActivity {
 
 
     DragFloatActionButton dragFloatActionButton;
+    TextView textView ;
 
     @Override
     @SuppressWarnings("static-access")
     @SuppressLint("InflateParams")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_test2);
+
+
+        textView = findViewById(R.id.action_text);
+
+
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Test2Activity.this,TestActivity.class);
+                startActivity(intent);
+
+
+
+
+            }
+        });
+
+
+
+
 //
 //        dragFloatActionButton = findViewById(R.id.dragFloatActionButton);
 //
