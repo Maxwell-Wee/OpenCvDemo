@@ -19,12 +19,10 @@ public class DragFloatActionButton extends android.support.v7.widget.AppCompatBu
 
     public DragFloatActionButton(Context context, AttributeSet attrs) {
         super(context, attrs);
-
     }
 
     public DragFloatActionButton(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
     }
 
 
@@ -46,7 +44,6 @@ public class DragFloatActionButton extends android.support.v7.widget.AppCompatBu
                 lastY = rawY;
                 ViewGroup parent;
                 if (getParent() != null) {
-
                     parentHeight = 1920;
                     parentWidth = 1080;
                 }

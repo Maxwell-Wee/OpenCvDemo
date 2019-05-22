@@ -1,31 +1,20 @@
 package com.subject.opencvdemo.application;
 
-import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.TranslateAnimation;
 import android.widget.Toast;
 
-import com.subject.opencvdemo.TestActivity;
-import com.subject.opencvdemo.views.DragFloatActionButton;
 import com.subject.opencvdemo.views.FlatingMovebutton;
-
-import org.opencv.android.Utils;
 
 public class OpenCvApplication extends Application {
     public static Context mContext;
@@ -45,7 +34,7 @@ public class OpenCvApplication extends Application {
         super.onCreate();
 
         mContext = this;
-        setFloatingButton();
+//        setFloatingButton();
 
     }
 

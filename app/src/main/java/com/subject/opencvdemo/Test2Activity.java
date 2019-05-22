@@ -3,40 +3,96 @@ package com.subject.opencvdemo;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.content.Intent;
+import android.app.Activity;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
+import android.media.ThumbnailUtils;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.subject.opencvdemo.views.DragFloatActionButton;
 
 public class Test2Activity extends AppCompatActivity {
 
 
-    DragFloatActionButton dragFloatActionButton;
+    private ImageView imageView;
 
+    RelativeLayout relativeLayout ;
+
+    private  int times = 0;
     @Override
     @SuppressWarnings("static-access")
     @SuppressLint("InflateParams")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-//
-//        dragFloatActionButton = findViewById(R.id.dragFloatActionButton);
-//
-//
-//        gradientChange(dragFloatActionButton, 40000);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams. FLAG_FULLSCREEN ,
+                WindowManager.LayoutParams. FLAG_FULLSCREEN);
+        setContentView(R.layout.activity_test2);
+        getSupportActionBar().hide();
+        imageView = findViewById(R.id.imageView);
 
-//
-//        /*这个注释不要移除，在打开界面提示的时候，后期还有用*/
-//        Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-//        intent.setData(Uri.parse("package:" + getPackageName()));
-//        startActivityForResult(intent, 100);
+        relativeLayout = findViewById(R.id.relativeLayout);
 
+
+
+
+
+
+
+
+        imageView.setOnClickListener(v -> {
+            relativeLayout(capture(this));
+        });
+
+
+
+
+    }
+
+
+
+
+    public static Bitmap convertToBlackWhite(Bitmap bmp) {
+        int width = bmp.getWidth(); // 获取位图的宽
+        int height = bmp.getHeight(); // 获取位图的高
+        int[] pixels = new int[width * height]; // 通过位图的大小创建像素点数组
+
+        bmp.getPixels(pixels, 0, width, 0, 0, width, height);
+        int alpha = 0xFF << 24;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                int grey = pixels[width * i + j];
+
+                int red = ((grey & 0x00FF0000) >> 16);
+                int green = ((grey & 0x0000FF00) >> 8);
+                int blue = (grey & 0x000000FF);
+
+                grey = (int) (red * 0.3 + green * 0.59 + blue * 0.11);
+                grey = alpha | (grey << 16) | (grey << 8) | grey;
+                pixels[width * i + j] = grey;
+            }
+        }
+        Bitmap newBmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+
+        newBmp.setPixels(pixels, 0, width, 0, 0, width, height);
+
+        Bitmap resizeBmp = ThumbnailUtils.extractThumbnail(newBmp, 380, 460);
+        return resizeBmp;
+    }
+
+
+    public Bitmap capture(Activity activity) {
+        activity.getWindow().getDecorView().setDrawingCacheEnabled(true);
+        Bitmap bmp = activity.getWindow().getDecorView().getDrawingCache();
+        return bmp;
     }
 
 
