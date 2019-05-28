@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.WindowManager;
@@ -13,7 +12,7 @@ import android.view.animation.LinearInterpolator;
 
 import com.subject.opencvdemo.application.OpenCvApplication;
 
-public class FlatingMovebutton extends android.support.v7.widget.AppCompatImageView {
+public class FloatMoveView extends android.support.v7.widget.AppCompatImageView {
 
     private float mTouchStartX;
     private float mTouchStartY;
@@ -39,15 +38,15 @@ public class FlatingMovebutton extends android.support.v7.widget.AppCompatImageV
 
     private OnSpeakListener listener;
 
-    public FlatingMovebutton(Context context) {
+    public FloatMoveView(Context context) {
         this(context, null);
     }
 
-    public FlatingMovebutton(Context context, AttributeSet attrs) {
+    public FloatMoveView(Context context, AttributeSet attrs) {
         this(context, attrs, -1);
     }
 
-    public FlatingMovebutton(Context context, AttributeSet attrs, int defStyleAttr) {
+    public FloatMoveView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.context = context;
         mActionBarHeight = dp2px(60);

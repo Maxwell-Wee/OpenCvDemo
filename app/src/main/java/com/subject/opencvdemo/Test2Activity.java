@@ -4,12 +4,21 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AppOpsManager;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.media.ThumbnailUtils;
+import android.os.Binder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -19,6 +28,13 @@ import android.widget.TextView;
 
 import com.subject.opencvdemo.views.DragFloatActionButton;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Method;
+
 public class Test2Activity extends AppCompatActivity {
 
 
@@ -27,6 +43,7 @@ public class Test2Activity extends AppCompatActivity {
     RelativeLayout relativeLayout ;
 
     private  int times = 0;
+    String imagePath =Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath()+ File.separator;
     @Override
     @SuppressWarnings("static-access")
     @SuppressLint("InflateParams")
@@ -38,108 +55,57 @@ public class Test2Activity extends AppCompatActivity {
         setContentView(R.layout.activity_test2);
         getSupportActionBar().hide();
         imageView = findViewById(R.id.imageView);
-
         relativeLayout = findViewById(R.id.relativeLayout);
 
-
-
-
-
-
-
-
+        LayoutInflater.from(this).inflate(R.layout.activity_test2,null);
         imageView.setOnClickListener(v -> {
-            relativeLayout(capture(this));
+            imageView.setImageBitmap(capture(this));
+
         });
 
 
 
+        Log.e("--->>", "   " + getAppOps(getApplicationContext()));
 
     }
-
-
-
-
-    public static Bitmap convertToBlackWhite(Bitmap bmp) {
-        int width = bmp.getWidth(); // 获取位图的宽
-        int height = bmp.getHeight(); // 获取位图的高
-        int[] pixels = new int[width * height]; // 通过位图的大小创建像素点数组
-
-        bmp.getPixels(pixels, 0, width, 0, 0, width, height);
-        int alpha = 0xFF << 24;
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                int grey = pixels[width * i + j];
-
-                int red = ((grey & 0x00FF0000) >> 16);
-                int green = ((grey & 0x0000FF00) >> 8);
-                int blue = (grey & 0x000000FF);
-
-                grey = (int) (red * 0.3 + green * 0.59 + blue * 0.11);
-                grey = alpha | (grey << 16) | (grey << 8) | grey;
-                pixels[width * i + j] = grey;
-            }
-        }
-        Bitmap newBmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-
-        newBmp.setPixels(pixels, 0, width, 0, 0, width, height);
-
-        Bitmap resizeBmp = ThumbnailUtils.extractThumbnail(newBmp, 380, 460);
-        return resizeBmp;
-    }
-
 
     public Bitmap capture(Activity activity) {
-        activity.getWindow().getDecorView().setDrawingCacheEnabled(true);
-        Bitmap bmp = activity.getWindow().getDecorView().getDrawingCache();
-        return bmp;
+        Bitmap result = Bitmap.createBitmap(1080, 1920, Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(result);
+        activity.getWindow().getDecorView().draw(canvas);
+        return result;
     }
 
-
-    public void gradientChange(final View view, final long duration) {
-        int startColorA = Color.parseColor("#1AADE0");
-        int startColorB = Color.parseColor("#1AADE0");
-        int startColorC = Color.parseColor("#F40FAB");
-        int startColorD = Color.parseColor("#FDCD71");
-        int startColorE = Color.parseColor("#C05EF2");
-        int startColorF = Color.parseColor("#1A6CDB");
-        int startColorG = Color.parseColor("#FDCD71");
-
-        int endColorA = Color.parseColor("#913bae");
-        int endColorB = Color.parseColor("#fd5b91");
-        int endColorC = Color.parseColor("#efce98");
-        int endColorD = Color.parseColor("#913bae");
-        int endColorE = Color.parseColor("#09a2e7");
-        int endColorF = Color.parseColor("#19dbb0");
-        int endColorG = Color.parseColor("#19dbb0");
-
-        final int[] gradientColor = new int[2];
-        ValueAnimator animator = ValueAnimator.ofInt(startColorA, startColorB, startColorC, startColorD, startColorE, startColorF, startColorG, startColorA);
-        animator.addUpdateListener(animation -> {
-            gradientColor[0] = (int) animation.getAnimatedValue();
-        });
-
-        animator.setDuration(duration);
-        animator.setEvaluator(new ArgbEvaluator());
-        animator.setRepeatCount(-1);
-        animator.start();
-        ValueAnimator animator2 = ValueAnimator.ofInt(endColorA, endColorB, endColorC, endColorD, endColorE, endColorF, endColorG, endColorA);
-        animator2.addUpdateListener(animation -> {
-            gradientColor[1] = (int) animation.getAnimatedValue();
-            view.setBackground(null);
-            view.setBackground(changeGradientColor(gradientColor));
-        });
-        animator2.setDuration(duration);
-        animator2.setEvaluator(new ArgbEvaluator());
-        animator2.setRepeatCount(-1);
-        animator2.start();
+    /**
+     * 判断 悬浮窗口权限是否打开
+     *
+     * @param context
+     * @return true 允许  false禁止
+     */
+    public static boolean getAppOps(Context context) {
+        try {
+            Object object = context.getSystemService(APP_OPS_SERVICE);
+            if (object == null) {
+                return false;
+            }
+            Class localClass = object.getClass();
+            Class[] arrayOfClass = new Class[3];
+            arrayOfClass[0] = Integer.TYPE;
+            arrayOfClass[1] = Integer.TYPE;
+            arrayOfClass[2] = String.class;
+            Method method = localClass.getMethod("checkOp", arrayOfClass);
+            if (method == null) {
+                return false;
+            }
+            Object[] arrayOfObject1 = new Object[3];
+            arrayOfObject1[0] = Integer.valueOf(24);
+            arrayOfObject1[1] = Integer.valueOf(Binder.getCallingUid());
+            arrayOfObject1[2] = context.getPackageName();
+            int m = ((Integer) method.invoke(object, arrayOfObject1)).intValue();
+            return m == AppOpsManager.MODE_ALLOWED;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
-
-    private GradientDrawable changeGradientColor(final int startColor[]) {
-        GradientDrawable gradientDrawable = new GradientDrawable(GradientDrawable.Orientation.BR_TL, startColor);
-        gradientDrawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
-        return gradientDrawable;
-    }
-
-
 }

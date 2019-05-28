@@ -14,13 +14,13 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.subject.opencvdemo.views.FlatingMovebutton;
+import com.subject.opencvdemo.views.FloatMoveView;
 
 public class OpenCvApplication extends Application {
     public static Context mContext;
 
     public WindowManager wm;
-    private com.subject.opencvdemo.views.FlatingMovebutton customeMovebutton;
+    private com.subject.opencvdemo.views.FloatMoveView customeMovebutton;
     private com.subject.opencvdemo.views.DragFloatActionButton dragFloatActionButton;
 
     private WindowManager.LayoutParams wmParams = new WindowManager.LayoutParams();
@@ -55,7 +55,7 @@ public class OpenCvApplication extends Application {
         wmParams.x = widthPixels - wmParams.width;
         wmParams.y = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 60, getResources().getDisplayMetrics());
 
-        customeMovebutton = new FlatingMovebutton(getApplicationContext());
+        customeMovebutton = new FloatMoveView(getApplicationContext());
 
         gradientChange(customeMovebutton, 40000);
         wm.addView(customeMovebutton, wmParams);

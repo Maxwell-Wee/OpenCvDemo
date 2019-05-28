@@ -7,19 +7,30 @@
     android:orientation="vertical">
 
 
-    <ImageView
-        android:id="@+id/imageView"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="@color/colorAccent"
-        android:layout_alignParentRight="true" />
-    <TextView
-        android:gravity="center"
-        android:background="@color/colorPrimary"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_marginTop="97dp"
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginLeft="63dp"
+            android:background="@color/colorAccent"
+            android:layout_alignParentRight="true" />
+
+        <TextView
+            android:gravity="center"
+            android:background="@color/colorPrimary"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+
+    </RelativeLayout>
 
 
 
