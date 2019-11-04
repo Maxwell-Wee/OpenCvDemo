@@ -1,65 +1,29 @@
-package com.subject.opencvdemo.application;
+package com.subject.opencvdemo;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
-import android.app.Application;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.drawable.GradientDrawable;
-import android.util.DisplayMetrics;
-import android.view.Gravity;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.Toast;
+import android.widget.RelativeLayout;
 
-import com.subject.opencvdemo.TestActivity;
-import com.subject.opencvdemo.views.FlatingMovebutton;
+public class TestActivity extends AppCompatActivity {
 
-public class OpenCvApplication extends Application {
-    public static Context mContext;
 
-    private WindowManager wm;
-    private com.subject.opencvdemo.views.FlatingMovebutton CustomeMovebutton;
+    private RelativeLayout view;
 
-    private WindowManager.LayoutParams wmParams=new WindowManager.LayoutParams();
-    public WindowManager.LayoutParams getParams(){
-        return wmParams;
-    }
     @Override
-    public void onCreate() {
-        super.onCreate();
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_test);
+        view = (RelativeLayout) findViewById(R.id.view);
 
-        mContext = this;
-        setFloatingButton();
-
-    }
-
+//        gradientChange(view,40000);
 
 
-    private void setFloatingButton(){
-        wm = (WindowManager) getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-        int widthPixels = dm.widthPixels;
-        int heightPixels = dm.heightPixels;
-        wmParams = getParams();
-        wmParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-        wmParams.format= PixelFormat.RGBA_8888;//设置背景图片
-        wmParams.flags= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE ;//
-        wmParams.gravity = Gravity.LEFT|Gravity.TOP;//
-        wmParams.x = widthPixels-150;   //设置位置像素
-        wmParams.y = heightPixels-110;
-        wmParams.width=200; //设置图片大小
-        wmParams.height=200;
-        CustomeMovebutton = new FlatingMovebutton(getApplicationContext());
-        gradientChange(CustomeMovebutton,40000);
-        wm.addView(CustomeMovebutton, wmParams);
-        CustomeMovebutton.setOnSpeakListener(() -> {
-            Toast.makeText(this, "点击事件", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this,TestActivity.class);
-            startActivity(intent);
-        });
     }
 
     public void  gradientChange(final View view, final long duration) {
@@ -106,9 +70,5 @@ public class OpenCvApplication extends Application {
         gradientDrawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
         return gradientDrawable;
     }
-
-
-
-
 
 }

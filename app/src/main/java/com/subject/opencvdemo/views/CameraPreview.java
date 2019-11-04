@@ -3,9 +3,7 @@ package com.subject.opencvdemo.views;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.hardware.Camera;
-import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
@@ -14,17 +12,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.widget.FrameLayout;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
-
 import java.io.IOException;
 import java.util.List;
-import java.util.function.Consumer;
-
-import io.reactivex.Observable;
 
 @SuppressWarnings("deprecation")
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
@@ -73,9 +62,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         } else {
             mCameraId = 0;
         }
-
         mCamera = Camera.open(mCameraId);
         Camera.Parameters cameraParams = mCamera.getParameters();
+        cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+
         mPreviewSizeList = cameraParams.getSupportedPreviewSizes();
         mPictureSizeList = cameraParams.getSupportedPictureSizes();
     }
@@ -111,11 +101,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // called again due to the change of the layout size in this if-statement.
         if (!mSurfaceConfiguring) {
             Camera.Size previewSize = determinePreviewSize(width, height);
-            Camera.Size pictureSize = previewSize;
 
             Log.v(TAG, "Desired Preview Size - w: " + width + ", h: " + height);
             mPreviewSize = previewSize;
-            mPictureSize = pictureSize;
+            mPictureSize = previewSize;
             mSurfaceConfiguring = adjustSurfaceLayoutSize(previewSize, width, height);
             // Continue executing this method if this method is called recursively.
             // Recursive call of surfaceChanged is very special case, which is a path from
